@@ -10,4 +10,7 @@ export default defineNuxtConfig({
     smtpPass: process.env.SMTP_PASS,
     smtpFrom: process.env.SMTP_FROM,
   },
+  imports: {
+    autoImport: true
+  }
 })
