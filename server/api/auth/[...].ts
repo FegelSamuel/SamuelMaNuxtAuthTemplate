@@ -50,7 +50,7 @@ export default NuxtAuthHandler({
         };
 
         // Send the email and log any errors or the success response
-        transport.sendMail(mailOptions, (error, info) => {
+        transport.sendMail(mailOptions, (error : any, info : any) => {
           if (error) {
             console.error("Error sending email:", error); // Log error if sending fails
           } else {
@@ -60,7 +60,7 @@ export default NuxtAuthHandler({
       },
     }),
   ],
-  pages: {
+  pages: {  // override default pages for logging in and signing up
     signIn: "/login", // Custom sign-in page URL
     newUser: "/signup", // Custom sign-up page URL
   },
@@ -108,11 +108,7 @@ export default NuxtAuthHandler({
           where: { email },
           select: {
             id: true,
-            firstname: true,
-            lastname: true,
-            phoneNum: true,
             role: true,
-            profilePic: true,
           }, // Retrieve only necessary fields
         });
 
@@ -123,11 +119,7 @@ export default NuxtAuthHandler({
             user: {
               ...session.user,
               id: additionalUserData.id,
-              firstname: additionalUserData.firstname,
-              lastname: additionalUserData.lastname,
-              phoneNum: additionalUserData.phoneNum,
-              role: additionalUserData.role,
-              profilePic: additionalUserData.profilePic,
+              role: additionalUserData.role
             },
           };
         }
