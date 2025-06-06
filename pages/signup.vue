@@ -8,52 +8,6 @@
     >
       Hello and Welcome!
     </h2>
-
-    <div class="space-y-6 w-full">
-      <!-- Profile Picture Upload with Preview -->
-      <div>
-        <label class="block text-md font-semibold text-gray-800 mb-2">
-          Profile Picture
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          @change="handleFileChange"
-          class="w-full px-4 py-2 border border-gray-300 rounded-xl"
-        />
-        <div v-if="imageUrl" class="mt-4 flex justify-center">
-          <img
-            :src="imageUrl"
-            alt="Profile Preview"
-            class="w-32 h-32 rounded-full object-cover"
-          />
-        </div>
-      </div>
-
-      <!-- First Name -->
-      <div>
-        <label class="block text-md font-semibold text-gray-800 mb-2"
-          >First Name</label
-        >
-        <input
-          type="text"
-          v-model="signupModel.firstname"
-          class="w-full px-4 py-3 text-md rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#89BBEB] transition"
-        />
-      </div>
-
-      <!-- Last Name -->
-      <div>
-        <label class="block text-md font-semibold text-gray-800 mb-2"
-          >Last Name</label
-        >
-        <input
-          type="text"
-          v-model="signupModel.lastname"
-          class="w-full px-4 py-3 text-md rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#89BBEB] transition"
-        />
-      </div>
-
       <!-- Email -->
       <div>
         <label class="block text-md font-semibold text-gray-800 mb-2"
@@ -65,19 +19,6 @@
           class="w-full px-4 py-3 text-md rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#89BBEB] transition"
         />
       </div>
-
-      <!-- Phone Number -->
-      <div>
-        <label class="block text-md font-semibold text-gray-800 mb-2"
-          >Phone Number</label
-        >
-        <input
-          type="tel"
-          v-model="signupModel.phoneNum"
-          class="w-full px-4 py-3 text-md rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#89BBEB] transition"
-        />
-      </div>
-    </div>
 
     <!-- Already have account -->
     <div class="text-md mt-6 text-center text-gray-600">
@@ -101,77 +42,23 @@
 
 <script setup lang="ts">
 const router = useRouter();
-
-const file = ref<File | null>(null);
-const imageUrl = ref<string | null>(null);
 const errors = ref({});
 
 const signupModel = ref({
   email: "",
-  firstname: "",
-  lastname: "",
   role: "USER",
-  phoneNum: "",
-  profilePic: "",
-  GlobalNotif: false,
 });
-
-function handleFileChange(e: Event) {
-  const input = e.target as HTMLInputElement;
-  if (input.files?.[0]) {
-    file.value = input.files[0];
-    previewImage(file.value);
-  }
-}
-
-function previewImage(file: File) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    imageUrl.value = reader.result as string;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function uploadToS3(file: File) {
-  const { uploadUrl, fileUrl } = await $fetch("/api/user/profile_picture", {
-    method: "POST",
-    body: {
-      fileName: `${Date.now()}-${file.name}`,
-      fileType: file.type,
-    },
-  });
-
-  const res = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Upload failed: ${res.status} - ${errorText}`);
-  }
-
-  return fileUrl;
-}
 
 const submitSignupForm = async () => {
   errors.value = {};
   try {
-    if (file.value) {
-      const uploadedUrl = await uploadToS3(file.value);
-      signupModel.value.profilePic = uploadedUrl;
-    }
-
-    const { data, error } = await useFetch("/api/user", {
+    const { data, error, status } = await useFetch("/api/user", {
       method: "POST",
       body: signupModel.value,
-      watch: false,
+      watch: false
     });
-
-    if (data?.value?.success) {
+    console.log(status.value)
+    if (status.value as string === "success") { // only accept status code 200
       router.push("login");
     } else {
       errors.value = { error: "Signup failed." };
@@ -180,5 +67,6 @@ const submitSignupForm = async () => {
     console.error("Error submitting signup form", err);
     errors.value = { error: "Something went wrong during signup." };
   }
+  console.log(errors.value)
 };
 </script>

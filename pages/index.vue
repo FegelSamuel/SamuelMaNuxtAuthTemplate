@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-const { status, data : session } = useAuth(); // destructuring data 
+const { status, data : session, signOut } = useAuth(); // destructuring the variable data that was returned from useAuth and renaming to to session
+// the reason why we want to rename data is because "session" is more descriptive.
 
 /*
 useAuth() returns something like this
@@ -12,11 +13,13 @@ useAuth() returns something like this
 }
 
 */
-const loggedIn = (session.value?.user?.email == undefined) ? false : true // either you are logged in or you are not logged in
+
+
 
 </script>
 
 <template lang="pug">
-button.px-5.py-2.rounded-2xl.bg-gradient-to-br.from-emerald-500.to-lime-400.text-white.font-semibold.shadow-lg.hover(v-if="loggedIn") Sign Out
-button.px-5.py-2.rounded-2xl.bg-gradient-to-br.from-red-500.to-fuschia-400.text-white.font-semibold.shadow-lg.hover(v-else) Sign Up
+button(v-if="status != 'unauthenticated' && status != undefined" @click="() => signOut({ callbackUrl: '/login'})") Sign Out
+button(v-else)
+  NuxtLink(to="/signup") Sign Up
 </template>
